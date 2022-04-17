@@ -1,0 +1,11 @@
+spring:
+  banner:
+    location: classpath:banner/banner.txt
+    image:
+     location: classpath:fotocreador/microservicios.png
+     
+#  config:
+    import: optional:configserver:${CONFIG_SERVER_SVC}
+  cloud:
+    config:
+      profile: dev
