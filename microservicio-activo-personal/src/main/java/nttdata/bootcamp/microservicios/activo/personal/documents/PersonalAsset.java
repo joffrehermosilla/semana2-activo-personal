@@ -15,9 +15,7 @@ import lombok.Data;
 public class PersonalAsset {
 	@Id
 	private String id;
-	
-    	
-	
+		
 	//cantidad de credito que tiene la cuenta peronal
 	private Double allowedperclient;
 	

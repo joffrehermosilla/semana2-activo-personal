@@ -1,12 +1,18 @@
 package nttdata.bootcamp.microservicios.activo.personal.controllers;
+import java.util.Date;
+
 import javax.validation.Valid;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -21,11 +27,10 @@ public class PersonalAssetController {
 	@Autowired
 	private PersonalAssetService service;
 	@GetMapping("/all")
+	
 	public Flux<PersonalAsset> searchAll() {
 	Flux<PersonalAsset> per = service.findAlls(); LOGGER.info("PERSONAL ASSET registered: "
 	+ per); return per; }
-
-
 
 	@GetMapping("/id/{id}")
 	public Mono<PersonalAsset> searchById(@PathVariable String id) {
@@ -38,6 +43,33 @@ public class PersonalAssetController {
 	LOGGER.info("PERSONAL ASSET create: " + service.saves(personalAsset));
 	return service.saves(personalAsset);
 	}
-	
+	@PutMapping("/update-personal-asset/{id}")
+	public ResponseEntity<Mono<?>> updatePersonalAsset(@PathVariable String id,
+			@Valid @RequestBody PersonalAsset personalAsset) {
+		Mono.just(personalAsset).doOnNext(t -> {
+			personalAsset.setId(id);
+			t.setCreateAt(new Date());
+		
+		}).onErrorReturn(personalAsset).onErrorResume(e -> Mono.just(personalAsset))
+			.onErrorMap(f -> new InterruptedException(f.getMessage())).subscribe(x -> LOGGER.info(x.toString()));
+		
+		Mono<PersonalAsset> pAsset = service.saves(personalAsset);
+		
+		if (pAsset!= null) {
+		return new ResponseEntity<>(pAsset, HttpStatus.CREATED);
+		}
+		return new ResponseEntity<>(Mono.just(new PersonalAsset()), HttpStatus.I_AM_A_TEAPOT);
+	}
+		
+	@DeleteMapping("/delete-personal-asset/{id}")
+	public ResponseEntity<Mono<Void>> deletePersonalAsset(@PathVariable String id) {
+	PersonalAsset personalAsset = new PersonalAsset();
+	personalAsset.setId(id);
+	Mono<PersonalAsset> newPersonalAsset = service.findById(id);
+	newPersonalAsset.subscribe();
+	Mono<Void> test = service.delete(personalAsset);
+	test.subscribe();
+	return ResponseEntity.noContent().build();
+	}
 	
 }
