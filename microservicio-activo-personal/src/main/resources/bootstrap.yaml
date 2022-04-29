@@ -12,6 +12,9 @@ spring:
 
 
 
-
+     
+config:
+ balanceador:
+  test: prueba balanceador de microservicio-activo-personal
 
   
